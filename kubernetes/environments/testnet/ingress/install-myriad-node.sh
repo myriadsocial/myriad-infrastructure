@@ -2,12 +2,15 @@
 
 set -e
 
-echo "Installing myriad-node Websocket RPC External Service"
+REPOSITORY_NAME=myriad-node
+DNS=ws-rpc.testnet.myriad.social
+
+echo "Installing ${REPOSITORY_NAME} Websocket RPC External Service"
 cat <<EOF | kubectl apply -f -
 kind: Service
 apiVersion: v1
 metadata:
-  name: myriad-node-websocket-rpc-external-service
+  name: ${REPOSITORY_NAME}-websocket-rpc-external-service
 spec:
   type: ExternalName
   externalName: gateway.testnet.octopus.network
@@ -15,12 +18,12 @@ spec:
   - port: 443
 EOF
 
-echo "Installing myriad-node Websocket RPC Ingress"
+echo "Installing ${REPOSITORY_NAME} Websocket RPC Ingress"
 cat <<EOF | kubectl apply -f -
 kind: Ingress
 apiVersion: networking.k8s.io/v1
 metadata:
-  name: myriad-node-websocket-rpc
+  name: ${REPOSITORY_NAME}-websocket-rpc
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt
     nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
@@ -32,18 +35,18 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-  - host: ws-rpc.testnet.myriad.social
+  - host: ${DNS}
     http:
       paths:
       - backend:
           service:
-            name: myriad-node-websocket-rpc-external-service
+            name: ${REPOSITORY_NAME}-websocket-rpc-external-service
             port:
               number: 443
         path: /
         pathType: ImplementationSpecific
   tls:
   - hosts:
-    - ws-rpc.testnet.myriad.social
-    secretName: ws-rpc.testnet.myriad.social-letsencrypt-tls
+    - ${DNS}
+    secretName: ${DNS}-letsencrypt-tls
 EOF

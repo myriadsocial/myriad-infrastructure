@@ -120,7 +120,7 @@ variable "gke_node_pools" {
       name         = "general"
       machine_type = "e2-medium"
       min_count    = 1
-      max_count    = 4
+      max_count    = 3
       auto_upgrade = true
     }
   ]
