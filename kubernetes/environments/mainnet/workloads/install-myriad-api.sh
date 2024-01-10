@@ -6,7 +6,7 @@ GCP_PROJECT_ID=myriad-social-mainnet
 REPOSITORY_OWNER=myriadsocial
 REPOSITORY_NAME=myriad-api
 REPOSITORY_FULL_NAME=${REPOSITORY_OWNER}/${REPOSITORY_NAME}
-DOCKER_TAG=2.3.1-rev2
+DOCKER_TAG=2.3.1-rev3
 
 echo "Installing ${REPOSITORY_NAME}"
 helm repo add myriadsocial https://charts.myriad.social
