@@ -13,7 +13,7 @@ To follow this guide, you will need:
 2. Download Docker Compose using the command:
     ```
     mkdir -p ~/.docker/cli-plugins/
-    curl -SL https://github.com/docker/compose/releases/download/v2.3.3/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+    curl -SL https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
     ```
 3. Set the executable permission for the downloaded binary:
     ```
