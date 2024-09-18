@@ -1,67 +1,3 @@
-# Ubuntu 22.04 Server Setup Guide
-
-This comprehensive guide covers the installation and basic configuration of Docker, Docker Compose, and Nginx on Ubuntu 22.04. It's designed to help you set up a server environment that's ready for deploying web applications, including the preparation for a Myriad Social instance.
-
-## Table of Contents
-
-- [Introduction](#introduction)
-- [Prerequisites](#prerequisites)
-- [Installing Docker on Ubuntu 22.04](#installing-docker-on-ubuntu-2204)
-- [Installing Docker Compose on Ubuntu 22.04](#installing-docker-compose-on-ubuntu-2204)
-- [Installing Nginx on Ubuntu 22.04](#installing-nginx-on-ubuntu-2204)
-- [Conclusion](#conclusion)
-- [Further Resources](#further-resources)
-
-## Introduction
-
-Deploying applications efficiently requires a solid foundation. Docker and Docker Compose simplify the management and orchestration of containerized applications, while Nginx offers a robust platform for serving web content and acting as a reverse proxy. This guide is your step-by-step companion for setting up these essential tools on an Ubuntu 22.04 server.
-
-## Prerequisites
-
-Before you begin, ensure you have:
-
-- An Ubuntu 22.04 server set up with a non-root `sudo` user and a firewall.
-
-## Installing Docker on Ubuntu 22.04
-
-Docker CE (Community Edition) installation involves updating your package list, installing required packages for repository management over HTTPS, adding Docker's official GPG key, setting up the Docker repository, and finally, installing Docker CE itself.
-
-After installation, verify Docker is running and optionally, add your user to the `docker` group to execute Docker commands without `sudo`.
-
-[Detailed Docker Installation Steps](./docs/docker-installation-guide.md)
-
-## Installing Docker Compose on Ubuntu 22.04
-
-With Docker installed, the next step is to install Docker Compose, which facilitates the management of multi-container Docker applications. Check the latest version on Docker Compose's GitHub releases page, download the Docker Compose binary, set the correct permissions, and verify the installation.
-
-Docker Compose relies on a YAML file to configure your application's services, which means you can start, stop, and rebuild services based on your configuration.
-
-[Detailed Docker Compose Installation Steps](./docs/docker-compose-installation.md)
-
-## Installing Nginx on Ubuntu 22.04
-
-Nginx is a high-performance web server and reverse proxy. The installation includes adding Nginx to your system from Ubuntu's repositories, adjusting the firewall to allow web traffic, and performing basic management tasks like starting and stopping the service.
-
-This section also guides you through setting up server blocks (similar to virtual hosts in Apache) to host multiple domains from a single server.
-
-[Detailed Nginx Installation Steps](./docs/nginx-installation-guide.md)
-
-## Conclusion
-
-By following this guide, you have set up a robust server environment on Ubuntu 22.04, ready for deploying containerized applications with Docker and Docker Compose, and serving web content with Nginx. This foundation is perfect for hosting a variety of web applications, including a Myriad Social instance.
-
-## Further Resources
-
-To deepen your knowledge and explore more about Docker, Docker Compose, and Nginx, visit the following resources:
-
-- [Docker Documentation](https://docs.docker.com/)
-- [Docker Compose Documentation](https://docs.docker.com/compose/)
-- [Nginx Documentation](https://nginx.org/en/docs/)
-
-This README serves as an overview. For detailed commands and configuration steps, refer to the linked sections within this document.
-
----
-
 # Complete Myriad Setup Guide
 
 This comprehensive guide provides step-by-step instructions for setting up a Docker environment with MongoDB, MinIO, myriad-api, and myriad-web, along with a zrok reverse proxy tunnel for public access. It includes Docker and Docker Compose installation, as well as Myriad Social service setup.
@@ -90,193 +26,12 @@ This comprehensive guide provides step-by-step instructions for setting up a Doc
 
 ## Automated Setup
 
-For a quick and automated setup, you can use the following script suite. This will perform all the necessary steps to set up your Myriad environment.
+For a quick and automated setup, you can use the following script. This will perform all the necessary steps to set up your Myriad environment.
 
-1. Create a file named `main_setup.sh` with the following content:
+1. Download the `main_setup.sh` script using wget:
 
 ```bash
-#!/bin/bash
-
-# main_setup.sh - Main script to run the entire Myriad setup process
-
-set -e
-
-# Function to run a script and check its exit status
-run_script() {
-    if [ -f "$1" ]; then
-        echo "Running $1..."
-        bash "$1"
-        if [ $? -ne 0 ]; then
-            echo "Error: $1 failed. Exiting."
-            exit 1
-        fi
-    else
-        echo "Error: $1 not found. Exiting."
-        exit 1
-    fi
-}
-
-# Create a directory for all the scripts
-mkdir -p myriad_setup_scripts
-cd myriad_setup_scripts
-
-# Download all the necessary scripts
-cat << 'EOF' > download_scripts.sh
-#!/bin/bash
-
-# download_scripts.sh - Script to download all necessary setup scripts
-
-download_script() {
-    wget -O "$1" "https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/setup_scripts/$1"
-    chmod +x "$1"
-}
-
-download_script "install_docker.sh"
-download_script "install_docker_compose.sh"
-download_script "install_zrok.sh"
-download_script "download_files.sh"
-download_script "setup_minio.sh"
-download_script "setup_mongodb.sh"
-download_script "setup_myriad_service.sh"
-download_script "run_docker_compose.sh"
-EOF
-
-chmod +x download_scripts.sh
-
-# Create individual setup scripts
-cat << 'EOF' > install_docker.sh
-#!/bin/bash
-
-# install_docker.sh - Script to install Docker
-
-sudo apt update
-sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt update
-sudo apt install -y docker-ce
-sudo usermod -aG docker ${USER}
-EOF
-
-cat << 'EOF' > install_docker_compose.sh
-#!/bin/bash
-
-# install_docker_compose.sh - Script to install Docker Compose
-
-mkdir -p ~/.docker/cli-plugins/
-curl -SL https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
-chmod +x ~/.docker/cli-plugins/docker-compose
-EOF
-
-cat << 'EOF' > install_zrok.sh
-#!/bin/bash
-
-# install_zrok.sh - Script to install and configure zrok
-
-wget https://github.com/openziti/zrok/releases/download/v0.4.40/zrok_0.4.40_linux_amd64.tar.gz
-mkdir zrok
-tar -xzvf zrok_0.4.40_linux_amd64.tar.gz -C zrok
-cd zrok
-./zrok invite
-./zrok enable
-./zrok share public localhost:8080 --name myriad-web
-./zrok share public localhost:8081 --name myriad-api
-cd ..
-EOF
-
-cat << 'EOF' > download_files.sh
-#!/bin/bash
-
-# download_files.sh - Script to download required files
-
-mkdir -p myriad-setup
-cd myriad-setup
-
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/docker-compose.yml
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/myriad-social.service
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/migrate_mongodb.sh
-chmod +x migrate_mongodb.sh
-
-mkdir -p mongodb/dump/myriad
-cd mongodb/dump/myriad
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.bson
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.metadata.json
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.bson
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.metadata.json
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.bson
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.metadata.json
-cd ../../..
-EOF
-
-cat << 'EOF' > setup_minio.sh
-#!/bin/bash
-
-# setup_minio.sh - Script to set up MinIO
-
-# Start MinIO container
-docker-compose up -d minio
-
-# Wait for MinIO to start
-sleep 10
-
-# Create access key and secret key
-access_key=$(docker-compose exec -T minio mc admin user add local accesskey secretkey)
-secret_key=$(docker-compose exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
-
-# Update docker-compose.yml with MinIO keys
-sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$access_key/" docker-compose.yml
-sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$secret_key/" docker-compose.yml
-EOF
-
-cat << 'EOF' > setup_mongodb.sh
-#!/bin/bash
-
-# setup_mongodb.sh - Script to set up and populate MongoDB
-
-mkdir -p mongodb_data
-docker-compose up -d mongodb
-sleep 10
-./migrate_mongodb.sh
-EOF
-
-cat << 'EOF' > setup_myriad_service.sh
-#!/bin/bash
-
-# setup_myriad_service.sh - Script to set up Myriad Social service
-
-user=$(whoami)
-sed -i "s|/home/user|/home/$user|g" myriad-social.service
-sudo mv myriad-social.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable myriad-social.service
-sudo systemctl start myriad-social.service
-EOF
-
-cat << 'EOF' > run_docker_compose.sh
-#!/bin/bash
-
-# run_docker_compose.sh - Script to run Docker Compose
-
-docker-compose up -d
-docker-compose ps
-docker-compose logs
-EOF
-
-# Make all scripts executable
-chmod +x *.sh
-
-# Run all scripts in order
-run_script "download_scripts.sh"
-run_script "install_docker.sh"
-run_script "install_docker_compose.sh"
-run_script "install_zrok.sh"
-run_script "download_files.sh"
-run_script "setup_minio.sh"
-run_script "setup_mongodb.sh"
-run_script "setup_myriad_service.sh"
-run_script "run_docker_compose.sh"
-
-echo "Myriad setup completed successfully!"
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/main_setup.sh
 ```
 
 2. Make the script executable:
@@ -291,7 +46,26 @@ chmod +x main_setup.sh
 ./main_setup.sh
 ```
 
-This script will automate the entire setup process. However, if you prefer to perform the setup manually or need more control over each step, follow the manual setup instructions below.
+This script will automatically download and execute all the necessary setup steps for your Myriad environment. It includes:
+
+- Installing Docker and Docker Compose
+- Installing and configuring zrok
+- Downloading required files
+- Setting up MinIO
+- Setting up and populating MongoDB
+- Setting up the Myriad Social service
+- Running Docker Compose to start all services
+
+The script will prompt you for confirmation before running each step, allowing you to control the setup process.
+
+> Note: Make sure you have `wget` installed on your system before running this script. If you don't have it, you can install it using:
+
+```bash
+sudo apt update
+sudo apt install wget
+```
+
+After running the script, your Myriad environment should be set up and ready to use. Make sure to check the console output for any important information or additional steps you might need to take.
 
 ## Manual Setup
 
