@@ -60,6 +60,14 @@ After running the script, your Myriad environment should be set up and ready to 
 
 ## Managing the Myriad Social Service
 
+- To run the Dockerfile:
+  ```bash
+  docker run -it --name marauder-container \
+  --network host \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  agustinustheoo/marauder-test:latest
+  ```
+
 - To start the service:
   ```bash
   sudo systemctl start myriad-social.service
