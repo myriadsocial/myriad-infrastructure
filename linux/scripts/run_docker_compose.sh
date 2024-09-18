@@ -8,5 +8,5 @@ if [ ! -f myriad-setup/docker-compose.yml ]; then
 fi
 
 docker compose -f myriad-setup/docker-compose.yml up -d
-docker compose ps
-docker compose logs
+docker compose -f myriad-setup/docker-compose.yml ps
+docker compose -f myriad-setup/docker-compose.yml logs
