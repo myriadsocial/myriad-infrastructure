@@ -28,8 +28,8 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Setting up public shares..."
-./zrok share public localhost:8080
-./zrok share public localhost:8081
+nohup ./zrok share public --headless localhost:8080 & disown
+nohup ./zrok share public --headless localhost:8081 & disown
 
 echo "zrok installation and configuration completed."
 cd ..
