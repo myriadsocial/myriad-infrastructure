@@ -79,6 +79,5 @@ run_script "download_files.sh"
 run_script "setup_minio.sh"
 run_script "setup_mongodb.sh"
 run_script "setup_myriad_service.sh"
-run_script "run_docker_compose.sh"
 
 echo "Myriad setup completed successfully!"

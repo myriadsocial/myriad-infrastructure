@@ -89,16 +89,16 @@ services:
       - NODE_ENV=development
       - HOST=127.0.0.1
       - PORT=3000
-      - NEXT_PUBLIC_APP_ENVIRONMENT=testnet
+      - NEXT_PUBLIC_APP_ENVIRONMENT=mainnet
       - NEXT_PUBLIC_APP_NAME=Myriad App
       - NEXT_PUBLIC_APP_VERSION=2.1.20
       - NEXTAUTH_URL=https://app.testnet.myriad.social
       - APP_SECRET=
       - NEXT_PUBLIC_MYRIAD_SUPPORT_MAIL=support@myriad.social
       - NEXT_PUBLIC_MYRIAD_WEBSITE_URL=https://myriad.social
-      - NEXT_PUBLIC_MYRIAD_RPC_URL=wss://ws-rpc.testnet.myriad.social
+      - NEXT_PUBLIC_MYRIAD_RPC_URL=wss://gateway.mainnet.octopus.network/myriad/a4cb0a6e30ff5233a3567eb4e8cb71e0
       - NEXT_PUBLIC_MYRIAD_API_URL=https://api.testnet.myriad.social
-      - NEAR_TIPPING_CONTRACT_ID=myriadtips.testnet
+      - NEAR_TIPPING_CONTRACT_ID=myriadtips.near
       - NEXT_PUBLIC_SENTRY_DSN=
     networks:
       - app-network
