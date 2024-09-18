@@ -94,7 +94,7 @@ After running the script, your Myriad environment should be set up and ready to 
   ```bash
   docker stop $(docker ps -a -q)
   docker rm $(docker ps -a -q)
-  docker volume rm $(docker volume ls -a -q)
+  docker volume rm $(docker volume ls -q)
   sudo systemctl stop myriad-social.service
   ```
 
