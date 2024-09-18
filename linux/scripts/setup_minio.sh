@@ -8,14 +8,14 @@ if [ ! -f myriad-setup/docker-compose.yml ]; then
 fi
 
 # Start MinIO container
-docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml up -d minio
+docker compose -f myriad-setup/docker-compose.yml up -d minio
 
 # Wait for MinIO to start
 sleep 10
 
 # Create access key and secret key
-access_key=$(docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml exec -T minio mc admin user add local accesskey secretkey)
-secret_key=$(docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
+access_key=$(docker compose -f myriad-setup/docker-compose.yml exec -T minio mc admin user add local accesskey secretkey)
+secret_key=$(docker compose -f myriad-setup/docker-compose.yml exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
 
 # Update docker-compose.yml with MinIO keys
 sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$access_key/" docker-compose.yml

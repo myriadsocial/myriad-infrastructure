@@ -8,7 +8,7 @@ if [ ! -f myriad-setup/docker-compose.yml ]; then
 fi
 
 mkdir -p mongodb_data
-docker compose-f myriad_setup_scripts/myriad-setup/docker-compose.yml up -d mongodb
+docker compose-f myriad-setup/docker-compose.yml up -d mongodb
 sleep 10
 
 URI="mongodb://root:password@localhost:27017/myriad?authSource=admin"
