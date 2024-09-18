@@ -5,10 +5,7 @@
 mkdir -p myriad-setup
 cd myriad-setup
 
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/docker-compose.yml
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/myriad-social.service
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/migrate_mongodb.sh
-chmod +x migrate_mongodb.sh
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/docker/docker-compose.yml
 
 mkdir -p mongodb/dump/myriad
 cd mongodb/dump/myriad
