@@ -242,15 +242,15 @@ minio:
 
 6.1. Start MinIO container:
 ```bash
-docker-compose up -d minio
+docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml up -d minio
 ```
 
 6.2. Wait for MinIO to start (approximately 10 seconds)
 
 6.3. Create access key and secret key:
 ```bash
-access_key=$(docker-compose exec -T minio mc admin user add local accesskey secretkey)
-secret_key=$(docker-compose exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
+access_key=$(docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml exec -T minio mc admin user add local accesskey secretkey)
+secret_key=$(docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
 ```
 
 6.4. Update docker-compose.yml with MinIO keys:
@@ -275,7 +275,7 @@ mongodb:
 
 7.3. Start MongoDB container:
 ```bash
-docker-compose up -d mongodb
+docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml up -d mongodb
 ```
 
 7.4. Wait for MongoDB to start (approximately 10 seconds)
@@ -294,7 +294,7 @@ nano myriad-social.service
 
 8.2. Update the `ExecStart` line to point to your Docker Compose file location:
 ```
-ExecStart=/usr/local/bin/docker-compose -f /path/to/your/docker-compose.yml up -d
+ExecStart=/usr/local/bin/docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml -f /path/to/your/docker-compose.yml up -d
 ```
 
 8.3. Move the service file to the systemd directory:
@@ -312,17 +312,17 @@ sudo systemctl enable myriad-social.service
 
 9.1. Start all services:
 ```bash
-docker-compose up -d
+docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml up -d
 ```
 
 9.2. Verify that all services are running:
 ```bash
-docker-compose ps
+docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml ps
 ```
 
 9.3. Check the logs for any errors:
 ```bash
-docker-compose logs
+docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml logs
 ```
 
 9.4. Access your applications:
@@ -385,12 +385,12 @@ docker-compose logs
 
 5. If MongoDB fails to start or populate, check the MongoDB logs:
    ```bash
-   docker-compose logs mongodb
+   docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml logs mongodb
    ```
 
 6. If MinIO fails to start or you can't access the dashboard, check the MinIO logs:
    ```bash
-   docker-compose logs minio
+   docker compose -f myriad_setup_scripts/myriad-setup/docker-compose.yml logs minio
    ```
 
 7. If the Myriad Social service fails to start, check the systemd logs:
