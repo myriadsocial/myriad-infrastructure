@@ -62,22 +62,240 @@ This README serves as an overview. For detailed commands and configuration steps
 
 ---
 
-# Comprehensive Docker Myriad Setup Guide
+# Complete Myriad Setup Guide
 
-This guide provides step-by-step instructions for setting up a Docker environment with MongoDB, MinIO, myriad-api, and myriad-web, along with a zrok reverse proxy tunnel for public access. It includes Docker and Docker Compose installation, as well as Myriad Social service setup.
+This comprehensive guide provides step-by-step instructions for setting up a Docker environment with MongoDB, MinIO, myriad-api, and myriad-web, along with a zrok reverse proxy tunnel for public access. It includes Docker and Docker Compose installation, as well as Myriad Social service setup.
 
 ## Table of Contents
-1. [Install Docker](#1-install-docker)
-2. [Install Docker Compose](#2-install-docker-compose)
-3. [Install and Configure zrok](#3-install-and-configure-zrok)
-4. [Download Required Files](#4-download-required-files)
-5. [Edit the Docker Compose File](#5-edit-the-docker-compose-file)
-6. [Set up MinIO](#6-set-up-minio)
-7. [Prepare and Populate MongoDB](#7-prepare-and-populate-mongodb)
-8. [Set Up Myriad Social Service](#8-set-up-myriad-social-service)
-9. [Run Docker Compose](#9-run-docker-compose)
+1. [Prerequisites](#prerequisites)
+2. [Automated Setup](#automated-setup)
+3. [Manual Setup](#manual-setup)
+   1. [Install Docker](#1-install-docker)
+   2. [Install Docker Compose](#2-install-docker-compose)
+   3. [Install and Configure zrok](#3-install-and-configure-zrok)
+   4. [Download Required Files](#4-download-required-files)
+   5. [Edit the Docker Compose File](#5-edit-the-docker-compose-file)
+   6. [Set up MinIO](#6-set-up-minio)
+   7. [Prepare and Populate MongoDB](#7-prepare-and-populate-mongodb)
+   8. [Set Up Myriad Social Service](#8-set-up-myriad-social-service)
+   9. [Run Docker Compose](#9-run-docker-compose)
+4. [Managing the Myriad Social Service](#managing-the-myriad-social-service)
+5. [Troubleshooting](#troubleshooting)
 
-## 1. Install Docker
+## Prerequisites
+
+- An Ubuntu 22.04 server or local machine with sudo privileges
+- A stable internet connection
+- Basic knowledge of command-line operations
+
+## Automated Setup
+
+For a quick and automated setup, you can use the following script suite. This will perform all the necessary steps to set up your Myriad environment.
+
+1. Create a file named `main_setup.sh` with the following content:
+
+```bash
+#!/bin/bash
+
+# main_setup.sh - Main script to run the entire Myriad setup process
+
+set -e
+
+# Function to run a script and check its exit status
+run_script() {
+    if [ -f "$1" ]; then
+        echo "Running $1..."
+        bash "$1"
+        if [ $? -ne 0 ]; then
+            echo "Error: $1 failed. Exiting."
+            exit 1
+        fi
+    else
+        echo "Error: $1 not found. Exiting."
+        exit 1
+    fi
+}
+
+# Create a directory for all the scripts
+mkdir -p myriad_setup_scripts
+cd myriad_setup_scripts
+
+# Download all the necessary scripts
+cat << 'EOF' > download_scripts.sh
+#!/bin/bash
+
+# download_scripts.sh - Script to download all necessary setup scripts
+
+download_script() {
+    wget -O "$1" "https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/setup_scripts/$1"
+    chmod +x "$1"
+}
+
+download_script "install_docker.sh"
+download_script "install_docker_compose.sh"
+download_script "install_zrok.sh"
+download_script "download_files.sh"
+download_script "setup_minio.sh"
+download_script "setup_mongodb.sh"
+download_script "setup_myriad_service.sh"
+download_script "run_docker_compose.sh"
+EOF
+
+chmod +x download_scripts.sh
+
+# Create individual setup scripts
+cat << 'EOF' > install_docker.sh
+#!/bin/bash
+
+# install_docker.sh - Script to install Docker
+
+sudo apt update
+sudo apt install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+sudo apt install -y docker-ce
+sudo usermod -aG docker ${USER}
+EOF
+
+cat << 'EOF' > install_docker_compose.sh
+#!/bin/bash
+
+# install_docker_compose.sh - Script to install Docker Compose
+
+mkdir -p ~/.docker/cli-plugins/
+curl -SL https://github.com/docker/compose/releases/download/v2.26.1/docker-compose-linux-x86_64 -o ~/.docker/cli-plugins/docker-compose
+chmod +x ~/.docker/cli-plugins/docker-compose
+EOF
+
+cat << 'EOF' > install_zrok.sh
+#!/bin/bash
+
+# install_zrok.sh - Script to install and configure zrok
+
+wget https://github.com/openziti/zrok/releases/download/v0.4.40/zrok_0.4.40_linux_amd64.tar.gz
+mkdir zrok
+tar -xzvf zrok_0.4.40_linux_amd64.tar.gz -C zrok
+cd zrok
+./zrok invite
+./zrok enable
+./zrok share public localhost:8080 --name myriad-web
+./zrok share public localhost:8081 --name myriad-api
+cd ..
+EOF
+
+cat << 'EOF' > download_files.sh
+#!/bin/bash
+
+# download_files.sh - Script to download required files
+
+mkdir -p myriad-setup
+cd myriad-setup
+
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/docker-compose.yml
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/myriad-social.service
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/migrate_mongodb.sh
+chmod +x migrate_mongodb.sh
+
+mkdir -p mongodb/dump/myriad
+cd mongodb/dump/myriad
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.bson
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.metadata.json
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.bson
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.metadata.json
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.bson
+wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.metadata.json
+cd ../../..
+EOF
+
+cat << 'EOF' > setup_minio.sh
+#!/bin/bash
+
+# setup_minio.sh - Script to set up MinIO
+
+# Start MinIO container
+docker-compose up -d minio
+
+# Wait for MinIO to start
+sleep 10
+
+# Create access key and secret key
+access_key=$(docker-compose exec -T minio mc admin user add local accesskey secretkey)
+secret_key=$(docker-compose exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
+
+# Update docker-compose.yml with MinIO keys
+sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$access_key/" docker-compose.yml
+sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$secret_key/" docker-compose.yml
+EOF
+
+cat << 'EOF' > setup_mongodb.sh
+#!/bin/bash
+
+# setup_mongodb.sh - Script to set up and populate MongoDB
+
+mkdir -p mongodb_data
+docker-compose up -d mongodb
+sleep 10
+./migrate_mongodb.sh
+EOF
+
+cat << 'EOF' > setup_myriad_service.sh
+#!/bin/bash
+
+# setup_myriad_service.sh - Script to set up Myriad Social service
+
+user=$(whoami)
+sed -i "s|/home/user|/home/$user|g" myriad-social.service
+sudo mv myriad-social.service /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable myriad-social.service
+sudo systemctl start myriad-social.service
+EOF
+
+cat << 'EOF' > run_docker_compose.sh
+#!/bin/bash
+
+# run_docker_compose.sh - Script to run Docker Compose
+
+docker-compose up -d
+docker-compose ps
+docker-compose logs
+EOF
+
+# Make all scripts executable
+chmod +x *.sh
+
+# Run all scripts in order
+run_script "download_scripts.sh"
+run_script "install_docker.sh"
+run_script "install_docker_compose.sh"
+run_script "install_zrok.sh"
+run_script "download_files.sh"
+run_script "setup_minio.sh"
+run_script "setup_mongodb.sh"
+run_script "setup_myriad_service.sh"
+run_script "run_docker_compose.sh"
+
+echo "Myriad setup completed successfully!"
+```
+
+2. Make the script executable:
+
+```bash
+chmod +x main_setup.sh
+```
+
+3. Run the script:
+
+```bash
+./main_setup.sh
+```
+
+This script will automate the entire setup process. However, if you prefer to perform the setup manually or need more control over each step, follow the manual setup instructions below.
+
+## Manual Setup
+
+### 1. Install Docker
 
 1.1. Update your package list:
 ```bash
@@ -116,7 +334,7 @@ sudo usermod -aG docker ${USER}
 su - ${USER}
 ```
 
-## 2. Install Docker Compose
+### 2. Install Docker Compose
 
 2.1. Create the Docker CLI plugins directory:
 ```bash
@@ -138,11 +356,35 @@ chmod +x ~/.docker/cli-plugins/docker-compose
 docker compose version
 ```
 
-## 3. Install and Configure zrok
+### 3. Install and Configure zrok
 
-[Previous zrok installation steps remain the same]
+3.1. Download zrok:
+```bash
+wget https://github.com/openziti/zrok/releases/download/v0.4.40/zrok_0.4.40_linux_amd64.tar.gz
+```
 
-## 4. Download Required Files
+3.2. Extract the archive:
+```bash
+mkdir zrok
+tar -xzvf zrok_0.4.40_linux_amd64.tar.gz -C zrok
+cd zrok
+```
+
+3.3. Set up zrok:
+```bash
+./zrok invite
+./zrok enable
+```
+
+3.4. Create reverse proxy tunnels for myriad-web and myriad-api:
+```bash
+./zrok share public localhost:8080 --name myriad-web
+./zrok share public localhost:8081 --name myriad-api
+```
+
+3.5. Note down the generated public URLs for myriad-web (`app.your.domain`) and myriad-api (`api.your.domain`).
+
+### 4. Download Required Files
 
 4.1. Create a directory for the project:
 ```bash
@@ -179,91 +421,134 @@ wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/l
 cd ../../..
 ```
 
-## 5. Edit the Docker Compose File
+### 5. Edit the Docker Compose File
 
-[Previous Docker Compose file editing steps remain the same]
-
-## 6. Set up MinIO
-
-[Previous MinIO setup steps remain the same]
-
-## 7. Prepare and Populate MongoDB
-
-[Previous MongoDB preparation and population steps remain the same]
-
-## 8. Set Up Myriad Social Service
-
-8.1. Create an installation script:
+5.1. Open the Docker Compose file in a text editor:
 ```bash
-nano install_myriad_service.sh
+nano docker-compose.yml
 ```
 
-8.2. Copy and paste the following content into the file:
+5.2. Update the environment variables for myriad-web:
+```yaml
+myriad-web:
+  environment:
+    - NEXT_PUBLIC_APP_ENVIRONMENT=testnet
+    - NEXT_PUBLIC_APP_NAME=Myriad App
+    - NEXT_PUBLIC_APP_VERSION=2.1.20
+    - NEXTAUTH_URL=https://app.your.domain
+    - APP_SECRET=<generate-a-random-secret>
+    - NEXT_PUBLIC_MYRIAD_API_URL=https://api.your.domain
+```
+
+5.3. Update the environment variables for myriad-api:
+```yaml
+myriad-api:
+  environment:
+    - DOMAIN=api.your.domain
+    - MYRIAD_ADMIN_SUBSTRATE_MNEMONIC=<keep-existing-value>
+    - MYRIAD_ADMIN_NEAR_MNEMONIC=<keep-existing-value>
+    - JWT_TOKEN_SECRET_KEY=<generate-a-random-secret>
+    - JWT_REFRESH_TOKEN_SECRET_KEY=<generate-a-random-secret>
+```
+
+5.4. Randomize usernames and passwords for MongoDB and MinIO:
+```yaml
+mongodb:
+  environment:
+    - MONGO_INITDB_ROOT_USERNAME=<random-username>
+    - MONGO_INITDB_ROOT_PASSWORD=<random-password>
+
+minio:
+  environment:
+    - MINIO_ROOT_USER=<random-username>
+    - MINIO_ROOT_PASSWORD=<random-password>
+```
+
+### 6. Set up MinIO
+
+6.1. Start MinIO container:
 ```bash
-#!/bin/bash
+docker-compose up -d minio
+```
 
-# Function to prompt for user input with a default value
-prompt_with_default() {
-    local prompt="$1"
-    local default="$2"
-    local response
+6.2. Wait for MinIO to start (approximately 10 seconds)
 
-    read -p "$prompt [$default]: " response
-    echo "${response:-$default}"
-}
+6.3. Create access key and secret key:
+```bash
+access_key=$(docker-compose exec -T minio mc admin user add local accesskey secretkey)
+secret_key=$(docker-compose exec -T minio mc admin user info local accesskey | grep SecretKey | awk '{print $2}')
+```
 
-# Prompt for the user who will run the docker compose
-user=$(prompt_with_default "Enter the user who will run the docker compose" "$(whoami)")
+6.4. Update docker-compose.yml with MinIO keys:
+```bash
+sed -i "s/MINIO_ACCESS_KEY=.*/MINIO_ACCESS_KEY=$access_key/" docker-compose.yml
+sed -i "s/MINIO_SECRET_KEY=.*/MINIO_SECRET_KEY=$secret_key/" docker-compose.yml
+```
 
-# Edit the service file
-sed -i "s|/home/user|/home/$user|g" myriad-social.service
+### 7. Prepare and Populate MongoDB
 
-# Move the service file to the systemd directory
+7.1. Create necessary directories for MongoDB data:
+```bash
+mkdir -p mongodb_data
+```
+
+7.2. Update the Docker Compose file to mount the MongoDB data directory:
+```yaml
+mongodb:
+  volumes:
+    - ./mongodb_data:/data/db
+```
+
+7.3. Start MongoDB container:
+```bash
+docker-compose up -d mongodb
+```
+
+7.4. Wait for MongoDB to start (approximately 10 seconds)
+
+7.5. Run the MongoDB migration script:
+```bash
+./migrate_mongodb.sh
+```
+
+### 8. Set Up Myriad Social Service
+
+8.1. Edit the Myriad Social service file:
+```bash
+nano myriad-social.service
+```
+
+8.2. Update the `ExecStart` line to point to your Docker Compose file location:
+```
+ExecStart=/usr/local/bin/docker-compose -f /path/to/your/docker-compose.yml up -d
+```
+
+8.3. Move the service file to the systemd directory:
+```bash
 sudo mv myriad-social.service /etc/systemd/system/
+```
 
-# Reload systemd to recognize the new service
+8.4. Reload systemd and enable the service:
+```bash
 sudo systemctl daemon-reload
-
-# Enable the service to start on boot
 sudo systemctl enable myriad-social.service
-
-# Start the service
-sudo systemctl start myriad-social.service
-
-echo "Myriad Social service has been installed, enabled, and started."
-echo "You can check its status with: sudo systemctl status myriad-social.service"
 ```
 
-8.3. Make the script executable:
-```bash
-chmod +x install_myriad_service.sh
-```
-
-8.4. Run the installation script:
-```bash
-sudo ./install_myriad_service.sh
-```
-
-8.5. Verify the service installation:
-```bash
-sudo systemctl status myriad-social.service
-```
-
-## 9. Run Docker Compose
+### 9. Run Docker Compose
 
 9.1. Start all services:
 ```bash
-docker compose up -d
+docker-compose up -d
 ```
 
 9.2. Verify that all services are running:
 ```bash
-docker compose ps
+docker-compose ps
 ```
 
 9.3. Check the logs for any errors:
 ```bash
-docker compose logs
+docker-compose logs
 ```
 
 9.4. Access your applications:
@@ -271,18 +556,16 @@ docker compose logs
    - Myriad API: https://api.your.domain
    - MinIO Dashboard: http://localhost:9001
 
-Congratulations! You have successfully set up your Docker environment with MongoDB, MinIO, myriad-api, and myriad-web, accessible through zrok reverse proxy tunnels. The MongoDB database has been populated with the necessary initial data, and the Myriad Social service is set up to manage the Docker Compose stack.
-
 ## Managing the Myriad Social Service
-
-- To stop the service:
-  ```bash
-  sudo systemctl stop myriad-social.service
-  ```
 
 - To start the service:
   ```bash
   sudo systemctl start myriad-social.service
+  ```
+
+- To stop the service:
+  ```bash
+  sudo systemctl stop myriad-social.service
   ```
 
 - To restart the service:
@@ -290,9 +573,57 @@ Congratulations! You have successfully set up your Docker environment with Mongo
   sudo systemctl restart myriad-social.service
   ```
 
+- To check the status of the service:
+  ```bash
+  sudo systemctl status myriad-social.service
+  ```
+
+- To view the service logs:
+  ```bash
+  sudo journalctl -u myriad-social.service
+  ```
+
 - To disable the service from starting at boot:
   ```bash
   sudo systemctl disable myriad-social.service
   ```
 
-Remember to regularly update your service configuration as needed, monitor your service logs for any issues, and ensure your Docker and Docker Compose setups are properly configured.
+## Troubleshooting
+
+1. If you encounter permission issues, make sure you have the necessary sudo privileges or are running the commands as root.
+
+2. If Docker fails to start, check if the Docker daemon is running:
+   ```bash
+   sudo systemctl status docker
+   ```
+   If it's not running, start it with:
+   ```bash
+   sudo systemctl start docker
+   ```
+
+3. If you can't connect to the Docker daemon, make sure your user is in the docker group:
+   ```bash
+   sudo usermod -aG docker ${USER}
+   ```
+   Then, log out and log back in for the changes to take effect.
+
+4. If zrok fails to create tunnels, check your firewall settings and make sure the necessary ports are open.
+
+5. If MongoDB fails to start or populate, check the MongoDB logs:
+   ```bash
+   docker-compose logs mongodb
+   ```
+
+6. If MinIO fails to start or you can't access the dashboard, check the MinIO logs:
+   ```bash
+   docker-compose logs minio
+   ```
+
+7. If the Myriad Social service fails to start, check the systemd logs:
+   ```bash
+   sudo journalctl -u myriad-social.service
+   ```
+
+Remember to regularly update your service configuration as needed, monitor your service logs for any issues, and ensure your Docker and Docker Compose setups are properly configured and up-to-date.
+
+For any persistent issues, consult the official documentation for each component or seek help from the Myriad Social community forums or support channels.
