@@ -10,18 +10,18 @@ fi
 # Check if mongorestore is already installed
 if ! command -v mongorestore &> /dev/null; then
     echo "mongorestore not found. Downloading and installing MongoDB database tools..."
-    
+
     # Download and install MongoDB database tools
     wget https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2204-x86_64-100.10.0.deb
-    
+
     echo "Installing MongoDB database tools..."
     sudo dpkg -i mongodb-database-tools-ubuntu2204-x86_64-100.10.0.deb
-    
+
     if [ $? -ne 0 ]; then
         echo "Error: Failed to install MongoDB database tools. Please check the installation output and try again."
         exit 1
     fi
-    
+
     # Clean up the downloaded .deb file
     rm mongodb-database-tools-ubuntu2204-x86_64-100.10.0.deb
 else
@@ -56,7 +56,7 @@ fi
 
 # Restore data from dump
 echo "Restoring data to MongoDB..."
-mongorestore --uri="$URI" myriad-setup/mongodb/dump/
+mongorestore --uri="$URI" --db=myriad myriad-setup/mongodb/dump/myriad
 
 if [ $? -ne 0 ]; then
     echo "Error: Failed to restore data to MongoDB. Please check the mongorestore output and try again."
