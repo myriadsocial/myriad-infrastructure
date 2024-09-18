@@ -31,7 +31,7 @@ For a quick and automated setup, you can use the following script. This will per
 1. Download the `main_setup.sh` script using wget:
 
 ```bash
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/main_setup.sh
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/main_setup.sh
 ```
 
 2. Make the script executable:
@@ -134,7 +134,7 @@ docker compose version
 
 3.1. Download zrok:
 ```bash
-wget https://github.com/openziti/zrok/releases/download/v0.4.40/zrok_0.4.40_linux_amd64.tar.gz
+wget --no-cache https://github.com/openziti/zrok/releases/download/v0.4.40/zrok_0.4.40_linux_amd64.tar.gz
 ```
 
 3.2. Extract the archive:
@@ -168,17 +168,17 @@ cd myriad-setup
 
 4.2. Download the Docker Compose YAML file:
 ```bash
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/docker-compose.yml
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/docker-compose.yml
 ```
 
 4.3. Download the Myriad Social service file:
 ```bash
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/myriad-social.service
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/myriad-social.service
 ```
 
 4.4. Download the MongoDB migration script:
 ```bash
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/migrate_mongodb.sh
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/migrate_mongodb.sh
 chmod +x migrate_mongodb.sh
 ```
 
@@ -186,12 +186,12 @@ chmod +x migrate_mongodb.sh
 ```bash
 mkdir -p mongodb/dump/myriad
 cd mongodb/dump/myriad
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.bson
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.metadata.json
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.bson
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.metadata.json
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.bson
-wget https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.metadata.json
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.bson
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/currencies.metadata.json
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.bson
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/networks.metadata.json
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.bson
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/mongodb/dump/myriad/servers.metadata.json
 cd ../../..
 ```
 

@@ -20,7 +20,7 @@ confirm_step() {
 download_script() {
     local script_name=$1
     echo "Downloading $script_name..."
-    curl -O "${REPO_URL}/scripts/${script_name}"
+    curl -H "Cache-Control: no-cache" -H "Pragma: no-cache" -O "${REPO_URL}/scripts/${script_name}"
     chmod +x "$script_name"
 }
 
