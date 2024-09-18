@@ -2,7 +2,7 @@
 
 # setup_minio.sh - Script to set up MinIO
 
-if [ ! -f docker-compose.yml ]; then
+if [ ! -f myriad-setup/docker-compose.yml ]; then
     echo "Error: docker-compose.yml not found. Please run the download_files.sh script first."
     exit 1
 fi

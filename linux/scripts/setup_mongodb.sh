@@ -2,7 +2,7 @@
 
 # setup_mongodb.sh - Script to set up and populate MongoDB
 
-if [ ! -f docker-compose.yml ] || [ ! -f migrate_mongodb.sh ]; then
+if [ ! -f myriad-setup/docker-compose.yml ]; then
     echo "Error: Required files not found. Please run the download_files.sh script first."
     exit 1
 fi
