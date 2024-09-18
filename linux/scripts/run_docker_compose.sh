@@ -7,6 +7,6 @@ if [ ! -f myriad-setup/docker-compose.yml ]; then
     exit 1
 fi
 
-docker compose-f myriad-setup/docker-compose.yml up -d
-docker composeps
-docker composelogs
+docker compose -f myriad-setup/docker-compose.yml up -d
+docker compose ps
+docker compose logs
