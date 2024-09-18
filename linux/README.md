@@ -7,6 +7,7 @@ This comprehensive guide provides step-by-step instructions for setting up a Doc
 2. [Setup](#setup)
 3. [Managing the Myriad Social Service](#managing-the-myriad-social-service)
 4. [Troubleshooting](#troubleshooting)
+5. [Additional Documentation](#additional-documentation)
 
 ## Prerequisites
 
@@ -136,3 +137,16 @@ After running the script, your Myriad environment should be set up and ready to 
 Remember to regularly update your service configuration as needed, monitor your service logs for any issues, and ensure your Docker and Docker Compose setups are properly configured and up-to-date.
 
 For any persistent issues, consult the official documentation for each component or seek help from the Myriad Social community forums or support channels.
+
+## Additional Documentation
+
+For more detailed information on specific components and setup processes, please refer to the following documentation:
+
+- [Ubuntu 22.04 Server Setup Guide](./docs/ubuntu-2204-server-setup.md)
+- [Docker Installation Guide](./docs/docker-installation-guide.md)
+- [Docker Compose Installation Guide](./docs/docker-compose-installation.md)
+- [Nginx Installation Guide](./docs/nginx-installation-guide.md)
+- [Nginx Configuration Guide](./docs/nginx-configuration-guide.md)
+- [Myriad Service Installation Guide](./docs/myriad-service-installation.md)
+
+These guides provide in-depth instructions for setting up and configuring various components of the Myriad environment.
