@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# main_setup.sh - Main script to run the entire Myriad setup process
+# marauder.sh - Main script to run the entire Myriad setup process
 
 set -e
 

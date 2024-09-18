@@ -18,22 +18,22 @@ This comprehensive guide provides step-by-step instructions for setting up a Doc
 
 For a quick and automated setup, you can use the following script. This will perform all the necessary steps to set up your Myriad environment.
 
-1. Download the `main_setup.sh` script using wget:
+1. Download the `marauder.sh` script using wget:
 
 ```bash
-wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/main_setup.sh
+wget --no-cache https://raw.githubusercontent.com/myriadsocial/myriad-infrastructure/main/linux/marauder.sh
 ```
 
 2. Make the script executable:
 
 ```bash
-chmod +x main_setup.sh
+chmod +x marauder.sh
 ```
 
 3. Run the script:
 
 ```bash
-./main_setup.sh
+./marauder.sh
 ```
 
 This script will automatically download and execute all the necessary setup steps for your Myriad environment. It includes:
@@ -87,6 +87,14 @@ After running the script, your Myriad environment should be set up and ready to 
 - To disable the service from starting at boot:
   ```bash
   sudo systemctl disable myriad-social.service
+  ```
+
+- To nuke the service you can try:
+  ```bash
+  docker stop $(docker ps -a -q)
+  docker rm $(docker ps -a -q)
+  docker volume rm $(docker volume ls -a -q)
+  sudo systemctl stop myriad-social.service
   ```
 
 ## Troubleshooting

@@ -37,5 +37,5 @@ echo "myriad-web URL: $myriad_web_url"
 echo "myriad-api URL: $myriad_api_url"
 echo "Service is now running. You can check its status with: sudo systemctl status myriad-social.service"
 
-docker compose ps
-docker compose logs
+docker compose -f myriad-setup/docker-compose.yml ps
+docker compose -f myriad-setup/docker-compose.yml logs
