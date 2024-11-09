@@ -17,7 +17,7 @@ This comprehensive guide provides step-by-step instructions for setting up a Doc
 
 ## Setup
 
-For a quick and automated setup, you can use the following script. This will perform all the necessary steps to set up your Myriad environment.
+For a quick and automated setup, you can use the marauder.sh script. This script orchestrates the complete setup of your Myriad environment. For detailed information about how the script works and its components, see the [Marauder Script Guide](./docs/marauder-script-guide.md).
 
 1. Download the `marauder.sh` script using wget:
 
